@@ -16,6 +16,7 @@ extern "C" {
 
 struct my_req {
 	struct qb_ipc_request_header hdr;
+	int len;
 	char message[256];
 };
 
@@ -73,7 +74,7 @@ static ERL_NIF_TERM start(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
         boost::shared_ptr<lua::vm_t> vm = lua::vm_t::create(res_type, pid);
         ERL_NIF_TERM result = enif_make_resource(env, vm.get());
 
-	vm->conn = qb_ipcc_connect("ipcserver", MAX_MSG_SIZE);
+	vm->conn = qb_ipcc_connect("myipcserver", MAX_MSG_SIZE);
         return enif_make_tuple2(env, atoms.ok, result);
     }
     catch( std::exception & ex )
@@ -161,11 +162,14 @@ static ERL_NIF_TERM call(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 	struct my_req req;
 	struct my_res res;
+	
+	memset(req.message, 0, sizeof(req.message));
 
 	sprintf(req.message, "hello node\n");
 
 	req.hdr.id = QB_IPC_MSG_USER_START + 3;
 	req.hdr.size = sizeof(struct my_req);
+	req.len = 10;
 
 	qb_ipcc_send(vm->conn, &req, req.hdr.size);	
 
