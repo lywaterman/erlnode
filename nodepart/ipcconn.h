@@ -1,5 +1,3 @@
-#define BUILDING_NODE_EXTENSION
-
 #ifndef IPCCONN_H
 #define IPCCONN_H
 
@@ -17,19 +15,18 @@ using namespace v8;
 
 class IpcConn: public node::ObjectWrap {
 	public:
-		static void Init();
-		static v8::Handle<v8:Value> NewInstance(const v8::Arguments& args);	
+		static void Init(Handle<Object> exports);
+		static Handle<Object> NewInstance();	
 
 	private:
-		explicit IpcServer(qb_ipcs_connection_t * c);
-		~IpcServer();
+		explicit IpcConn();
+		~IpcConn();
 
-		static v8::Handle<v8::Value> New(const v8::Arguments& args);
+		static v8::Handle<v8::Value> New(const Arguments& args);
 		static v8::Handle<v8::Value> Send(const v8::Arguments& args); 			
 
 		static v8::Persistent<v8::Function> constructor;	
 	
-		qb_ipcs_connection_t * c_;
 };
 
 

@@ -66,7 +66,8 @@ INCS_Release := \
 	-I/usr/include
 
 OBJS := \
-	$(obj).target/$(TARGET)/nodeipc.o
+	$(obj).target/$(TARGET)/nodeipc.o \
+	$(obj).target/$(TARGET)/ipcconn.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)

@@ -9,7 +9,7 @@ Release/obj.target/nodeipc/nodeipc.o: ../nodeipc.cc \
  /root/.node-gyp/0.10.21/deps/v8/include/v8stdint.h \
  /root/.node-gyp/0.10.21/src/node_object_wrap.h \
  /root/.node-gyp/0.10.21/src/node.h \
- /root/.node-gyp/0.10.21/src/node_buffer.h
+ /root/.node-gyp/0.10.21/src/node_buffer.h ../ipcconn.h
 ../nodeipc.cc:
 /root/.node-gyp/0.10.21/src/node.h:
 /root/.node-gyp/0.10.21/deps/uv/include/uv.h:
@@ -21,3 +21,4 @@ Release/obj.target/nodeipc/nodeipc.o: ../nodeipc.cc \
 /root/.node-gyp/0.10.21/src/node_object_wrap.h:
 /root/.node-gyp/0.10.21/src/node.h:
 /root/.node-gyp/0.10.21/src/node_buffer.h:
+../ipcconn.h:

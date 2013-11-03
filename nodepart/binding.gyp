@@ -3,7 +3,7 @@
         {
             'target_name': 'nodeipc',
             'sources': [
-                './nodeipc.cc'
+                './nodeipc.cc', './ipcconn.cc'
             ],
             'include_dirs': [
                 "/usr/include"

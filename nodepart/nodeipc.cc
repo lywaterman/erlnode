@@ -13,6 +13,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#include "ipcconn.h" 
+
 using namespace v8;
 
 struct my_req {
@@ -70,10 +72,17 @@ s1_msg_process_fn(qb_ipcs_connection_t * c, void *data, size_t size)
 	node::Buffer *buffer = node::Buffer::New(req_pt->len);
 
 	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
-
-	const unsigned argc = 2;	
 	
-	Local<Value> argv[argc]	= {Local<Value>::New(String::New("data")),
+	const unsigned argc1 = 0;
+	Local<Value> argv1[argc1] = { };
+
+	Handle<Object> client = IpcConn::NewInstance();
+	client->SetInternalField(0, External::New(c));
+
+	const unsigned argc = 3;	
+	
+	Local<Value> argv[argc]	= {Local<Value>::New(client),
+				   Local<Value>::New(String::New("data")),
 				   Local<Value>::New(buffer->handle_)};
 
 	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
@@ -143,6 +152,7 @@ Handle<Value> IpcServer_Listen(const Arguments& args) {
 
 
 void init(Handle<Object> exports) {
+	IpcConn::Init(exports);
 	exports->Set(String::NewSymbol("ipcserver_listen"),
 		FunctionTemplate::New(IpcServer_Listen)->GetFunction());
 }

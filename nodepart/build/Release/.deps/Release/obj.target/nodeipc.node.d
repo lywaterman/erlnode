@@ -1,1 +1,1 @@
-cmd_Release/obj.target/nodeipc.node := flock ./Release/linker.lock g++ -shared -pthread -rdynamic -m64  -Wl,-soname=nodeipc.node -o Release/obj.target/nodeipc.node -Wl,--start-group Release/obj.target/nodeipc/nodeipc.o -Wl,--end-group /usr/lib/libqb.so
+cmd_Release/obj.target/nodeipc.node := flock ./Release/linker.lock g++ -shared -pthread -rdynamic -m64  -Wl,-soname=nodeipc.node -o Release/obj.target/nodeipc.node -Wl,--start-group Release/obj.target/nodeipc/nodeipc.o Release/obj.target/nodeipc/ipcconn.o -Wl,--end-group /usr/lib/libqb.so

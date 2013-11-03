@@ -1,24 +1,23 @@
-#define BUILDING_NODE_EXTENSION
 #include <node.h>
-#include "ipcserver.h"
+#include "ipcconn.h"
 
 using namespace v8;
 
-Persistent<Function> IpcServer::constructor;
+Persistent<Function> IpcConn::constructor;
 
 
-IpcServer::IpcServer(qb_ipcs_connection_t * c): c_(c) {
-
-}
-
-IpcServer::~IpcServer() {
+IpcConn::IpcConn() {
 
 }
 
-void IpcServer::Init(Handle<Object> exports) {
+IpcConn::~IpcConn() {
+
+}
+
+void IpcConn::Init(Handle<Object> exports) {
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
-	tpl->SetClassName(String::NewSymbol("IpcServer"));
+	tpl->SetClassName(String::NewSymbol("IpcConn"));
 	tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
 	//Prototype
@@ -26,29 +25,44 @@ void IpcServer::Init(Handle<Object> exports) {
 		FunctionTemplate::New(Send)->GetFunction());
 
 	constructor = Persistent<Function>::New(tpl->GetFunction());
-	exports->Set(String::NewSymbol("IpcServer"), constructor);
+	exports->Set(String::NewSymbol("IpcConn"), constructor);
 }
 
-Handle<Value> IpcServer::New(const Arguments& args) {
+Handle<Value> IpcConn::New(const Arguments& args) {
 	HandleScope scope;
 
 	if (args.IsConstructCall()) {
-		int value = (int)(args[0]->IsUndefined() ? 0 : args[0]->NumberValue());
+		printf("construct call\n");
 		
-		IpcServer *obj = new IpcServer(value);
+		IpcConn *obj = new IpcConn();
 		obj->Wrap(args.This());
 		return args.This();
 	} else {
-		const int argc = 1;
-		Local<Value> argv[argc] = {args[0]};
-		return scope.Close(constructor->NewInstance(argc, argv));
+		printf("non construct call");
+		const int argc = 0;
+		Local<Value> argv[argc] = { };
+		return scope.Close(constructor->NewInstance());
 	}
 }
 
-
-Handle<Value> IpcServer::Send(const v8::Arguments& args) {
+Handle<Object> IpcConn::NewInstance() {
 	HandleScope scope;
 
-	IpcServer* obj = ObjectWrap::Unwrap<IpcServer>(args.This());
+	const unsigned argc = 0;
+	Local<Value> argv[argc] = { };
+
+	return scope.Close(constructor->NewInstance());
+}
+
+
+Handle<Value> IpcConn::Send(const v8::Arguments& args) {
+	HandleScope scope;
+
+	IpcConn* obj = ObjectWrap::Unwrap<IpcConn>(args.This());
+
+	Local<Object> self = args.Holder();
+	Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+
+	qb_ipcs_connection_t * c = (qb_ipcs_connection_t *)(wrap->Value());
 
 }
