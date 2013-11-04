@@ -79,7 +79,8 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	qb_ipcs_connection_t * c = (qb_ipcs_connection_t *)(wrap->Value());
 
-	qb_ipcs_response_send(c, &res, sizeof(res));
+	qb_ipcs_event_send(c, &res, sizeof(res));
+	//qb_ipcs_response_send(c, &res, sizeof(res));
 
 	printf("connect: %ld\n", (long)c);
 

@@ -160,22 +160,22 @@ struct call_handler : public base_handler<void>
                 result[1] = lua::stack::pop_all(vm().state());
                 send_result_caller(vm(), "moon_response", result, call.caller);
 
-				struct my_req req;
-				struct my_res res;
-				
-				memset(req.message, 0, sizeof(req.message));
+				//struct my_req req;
+				//struct my_res res;
+				//
+				//memset(req.message, 0, sizeof(req.message));
 		
-				sprintf(req.message, "hello node\n");
+				//sprintf(req.message, "hello node\n");
 		
-				req.hdr.id = QB_IPC_MSG_USER_START + 3;
-				req.hdr.size = sizeof(struct my_req);
-				req.len = 10;
+				//req.hdr.id = QB_IPC_MSG_USER_START + 3;
+				//req.hdr.size = sizeof(struct my_req);
+				//req.len = 10;
 		
-				qb_ipcc_send(vm().conn, &req, req.hdr.size);	
-						
-				memset(&res, 0, sizeof(res));
-				int rc = qb_ipcc_recv(vm().conn, &res, sizeof(res), -1);
-				printf("%s\n", res.message);
+				//qb_ipcc_send(vm().conn, &req, req.hdr.size);	
+				//		
+				//memset(&res, 0, sizeof(res));
+				//int rc = qb_ipcc_recv(vm().conn, &res, sizeof(res), -1);
+				//printf("%s\n", res.message);
 
             }
         }
@@ -244,6 +244,7 @@ vm_t::vm_t(erlcpp::lpid_t const& pid)
     : pid_(pid)
     , luastate_(luaL_newstate(), lua_close)
 {
+	conn = NULL;
 	stack_guard_t guard(*this);
 
 //	char ff[256] = {0,};
@@ -341,6 +342,14 @@ void vm_t::run()
 			//memset(&res, 0, sizeof(res));
 			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
 			//printf("%s\n", res.message);
+			struct my_res res;
+			
+			memset(&res, 0, sizeof(res));
+
+			if (this->conn != NULL) {
+				int rc = qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
+			}
+			printf("%s\n", res.message);
 
             perform_task<call_handler>(*this);
 		}
