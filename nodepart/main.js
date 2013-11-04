@@ -18,10 +18,20 @@ http.createServer(function (req, res) {
 console.log('Server running at http://127.0.0.1:1337/');
 
 console.log(xx.send)
+
+var client1 = null
 addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
 	client.send("hello erlang")
+	client1 = client
 }
 
 )
+
+setInterval(function() { 
+	if (client1 != null) {
+		client1.send("hello erlang test")
+	}
+
+}, 2000)
 
 console.log("not block")

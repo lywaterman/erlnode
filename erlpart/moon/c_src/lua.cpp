@@ -346,12 +346,17 @@ void vm_t::run()
 			
 			memset(&res, 0, sizeof(res));
 
+			printf("123123123123123\n");
 			if (this->conn != NULL) {
 				int rc = qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
-			}
-			printf("%s\n", res.message);
+				if (rc > 0) {
+				}
 
-            perform_task<call_handler>(*this);
+				printf("%s\n", res.message);
+			}
+
+			//sleep(1000);
+            //perform_task<call_handler>(*this);
 		}
     }
     catch(quit_tag) {}
