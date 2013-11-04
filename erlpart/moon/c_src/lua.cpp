@@ -300,7 +300,7 @@ void vm_t::run()
         for(;;)
         {
             perform_task<call_handler>(*this);
-        }
+		}
     }
     catch(quit_tag) {}
     catch(std::exception & ex)

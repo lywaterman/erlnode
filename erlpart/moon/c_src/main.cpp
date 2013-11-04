@@ -14,17 +14,6 @@ extern "C" {
 #define ONE_MEG 1048576
 #define MAX_MSG_SIZE ONE_MEG
 
-struct my_req {
-	struct qb_ipc_request_header hdr;
-	int len;
-	char message[256];
-};
-
-struct my_res {
-	struct qb_ipc_response_header hdr;
-	char message[256];
-};
-
 using namespace erlcpp;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -172,6 +161,10 @@ static ERL_NIF_TERM call(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	req.len = 10;
 
 	qb_ipcc_send(vm->conn, &req, req.hdr.size);	
+			
+	memset(&res, 0, sizeof(res));
+	int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
+	printf("%s\n", res.message);
 
 
         return atoms.ok;

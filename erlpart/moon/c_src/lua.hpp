@@ -14,6 +14,18 @@ extern "C" {
 
 }
 
+struct my_req {
+	struct qb_ipc_request_header hdr;
+	int len;
+	char message[256];
+};
+
+struct my_res {
+	struct qb_ipc_response_header hdr;
+	int len;
+	char message[256];
+};
+
 
 
 namespace lua {

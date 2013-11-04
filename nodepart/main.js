@@ -1,5 +1,13 @@
 var addon = require('./build/Release/nodeipc')
 
+var bert = require('./bert')
+
+var yy = bert.encode({"abc":1})
+
+console.log(typeof yy)
+
+console.log(bert.decode(yy))
+
 var xx = new addon.IpcConn(12313)
 
 var http = require('http');
@@ -11,7 +19,7 @@ console.log('Server running at http://127.0.0.1:1337/');
 
 console.log(xx.send)
 addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
-	console.log(client)
+	client.send("hello erlang")
 }
 
 )

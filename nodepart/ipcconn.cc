@@ -48,8 +48,8 @@ Handle<Value> IpcConn::New(const Arguments& args) {
 Handle<Object> IpcConn::NewInstance() {
 	HandleScope scope;
 
-	const unsigned argc = 0;
-	Local<Value> argv[argc] = { };
+	//const unsigned argc = 0;
+	//Local<Value> argv[argc] = { };
 
 	return scope.Close(constructor->NewInstance());
 }
@@ -58,11 +58,30 @@ Handle<Object> IpcConn::NewInstance() {
 Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 	HandleScope scope;
 
-	IpcConn* obj = ObjectWrap::Unwrap<IpcConn>(args.This());
+	struct my_res res;
+	memset(&res, 0, sizeof(res));
+
+	v8::String *str = (*args[0]->ToString());
+
+	int str_len = str->Length();
+
+	printf("str_len:%d\n", str_len);
+
+	res.hdr.size = sizeof(struct my_res);
+	res.len = str_len;
+
+	str->WriteAscii(res.message, 0, str_len);
+
+	printf("message: %s\n", res.message);
 
 	Local<Object> self = args.Holder();
 	Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
 
 	qb_ipcs_connection_t * c = (qb_ipcs_connection_t *)(wrap->Value());
 
+	qb_ipcs_response_send(c, &res, sizeof(res));
+
+	printf("connect: %ld\n", (long)c);
+
+	return scope.Close(Undefined());
 }

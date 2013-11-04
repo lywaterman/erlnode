@@ -19,17 +19,10 @@ extern "C" {
 
 using namespace v8;
 
-struct my_req {
-	struct qb_ipc_request_header hdr;
-	int len;
-	char message[256];
-};
-
 struct my_async_data {
 	qb_ipcs_connection_t * c;
 	void* data;
 };
-
 
 struct my_async_data async_data;
 static Persistent<Function> cb_;
@@ -158,9 +151,9 @@ void process_message(uv_async_t *handle, int status) {
 	printf("%d\n", req_pt->len);
 	printf("%s\n", req_pt->message);
 
-	node::Buffer *buffer = node::Buffer::New(req_pt->len);
+	//node::Buffer *buffer = node::Buffer::New(req_pt->len);
 
-	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
+	//memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
 	
 	const unsigned argc1 = 0;
 	Local<Value> argv1[argc1] = { };
@@ -172,7 +165,7 @@ void process_message(uv_async_t *handle, int status) {
 	
 	Local<Value> argv[argc]	= {Local<Value>::New(client),
 				   Local<Value>::New(String::New("data")),
-				   Local<Value>::New(buffer->handle_)};
+				   Local<Value>::New(String::New(req_pt->message, req_pt->len))};
 
 	printf("call\n");
 	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
