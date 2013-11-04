@@ -8,7 +8,7 @@
 
 %% api:
 -export([start_link/1]).
--export([load/3, eval/3, call/4]).
+-export([send/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public api:
@@ -16,16 +16,8 @@
 start_link(Options) ->
     gen_server:start_link(?MODULE, Options, []).
 
-load(Pid, File, Timeout) ->
-	gen_server:call(Pid, {load, File, self()}, Timeout),
-	receive_response_self().
-
-eval(Pid, Code, Timeout) ->
-	gen_server:call(Pid, {eval, Code, self()}, Timeout),
-	receive_response_self().
-
-call(Pid, Fun, Args, Timeout) ->
-	gen_server:call(Pid, {call, Fun, Args, self()}, Timeout),
+send(Pid, Bin, Timeout) ->
+	gen_server:call(Pid, {send, Bin, self()}, Timeout),
 	receive_response_self().
 
 
@@ -41,15 +33,7 @@ init(Options) ->
     {ok, VM} = erlnode_nif:start(self()),
     {ok, #state{vm=VM, callback=Callback}}.
 
-handle_call({load, File, Caller}, _, State=#state{vm=VM}) ->
-    ok = erlnode_nif:load(VM, to_binary(File), Caller),
-    {reply, ok, State};
-
-handle_call({eval, Code, Caller}, _, State=#state{vm=VM}) ->
-    ok = erlnode_nif:eval(VM, to_binary(Code), Caller),
-    {reply, ok, State};
-
-handle_call({call, Fun, Args, Caller}, _, State=#state{vm=VM}) when is_list(Args) ->
+handle_call({send, Fun, Args, Caller}, _, State=#state{vm=VM}) when is_list(Args) ->
     ok = erlnode_nif:call(VM, to_atom(Fun), Args, Caller),
     {reply, ok, State}.
 

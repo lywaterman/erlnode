@@ -3,9 +3,7 @@
 -export([start/0, stop/0]).
 -export([start_vm/0, start_vm/1, stop_vm/1]).
 
--export([load/2, load/3]).
--export([eval/2, eval/3]).
--export([call/3, call/4]).
+-export([send/2, send/3]).
 
 -export([test/1]).
 
@@ -48,27 +46,11 @@ stop_vm(Pid) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-load(Pid, File) ->
-    load(Pid, File, infinity).
+send(Pid, Bin) ->
+    send(Pid, Bin, infinity).
 
-load(Pid, File, Timeout) ->
-    erlnode_vm:load(Pid, File, Timeout).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-eval(Pid, Code) ->
-    eval(Pid, Code, infinity).
-
-eval(Pid, Code, Timeout) ->
-    erlnode_vm:eval(Pid, Code, Timeout).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-call(Pid, Fun, Args) ->
-    call(Pid, Fun, Args, infinity).
-
-call(Pid, Fun, Args, Timeout) ->
-    erlnode_vm:call(Pid, Fun, Args, Timeout).
+send(Pid, Bin, Timeout) ->
+    erlnode_vm:call(Pid, Bin, Timeout).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
