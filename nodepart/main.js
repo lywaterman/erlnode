@@ -10,10 +10,10 @@ http.createServer(function (req, res) {
 console.log('Server running at http://127.0.0.1:1337/');
 
 console.log(xx.send)
-//addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
-//	console.log(client)
-//}
-//
-//)
+addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
+	console.log(client)
+}
 
-console.log("sdfsdf")
+)
+
+console.log("not block")

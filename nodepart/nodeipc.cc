@@ -13,6 +13,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#include <uv.h>
+
 #include "ipcconn.h" 
 
 using namespace v8;
@@ -23,10 +25,18 @@ struct my_req {
 	char message[256];
 };
 
+struct my_async_data {
+	qb_ipcs_connection_t * c;
+	void* data;
+};
 
-static Local<Function> cb_;
+
+struct my_async_data async_data;
+static Persistent<Function> cb_;
 static qb_loop_t *bms_loop;
 static qb_ipcs_service_t *s1;
+
+static uv_async_t async;
 
 static int32_t
 s1_connection_accept_fn(qb_ipcs_connection_t * c, uid_t uid, gid_t gid)
@@ -59,33 +69,14 @@ s1_connection_closed_fn(qb_ipcs_connection_t *c)
 static int32_t
 s1_msg_process_fn(qb_ipcs_connection_t * c, void *data, size_t size)
 {
-	struct qb_ipc_request_header *hdr;
-	struct my_req *req_pt;	
 
-	hdr = (struct qb_ipc_request_header *)data;
+	async_data.c = c;
+	async_data.data = data;
 
-	req_pt = (struct my_req *)data;
+	async.data = (void*)(&async_data);
 
-	printf("%d\n", req_pt->len);
-	printf("%s\n", req_pt->message);
-
-	node::Buffer *buffer = node::Buffer::New(req_pt->len);
-
-	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
-	
-	const unsigned argc1 = 0;
-	Local<Value> argv1[argc1] = { };
-
-	Handle<Object> client = IpcConn::NewInstance();
-	client->SetInternalField(0, External::New(c));
-
-	const unsigned argc = 3;	
-	
-	Local<Value> argv[argc]	= {Local<Value>::New(client),
-				   Local<Value>::New(String::New("data")),
-				   Local<Value>::New(buffer->handle_)};
-
-	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
+	printf("async sdklfjkldsjfkldjsfkldklsf\n");
+	uv_async_send(&async);
 
 	return 0;
 }
@@ -116,6 +107,78 @@ my_dispatch_del(int32_t fd)
 	return qb_loop_poll_del(bms_loop, fd);
 }
 
+void thread_ipc_poll(uv_work_t *req) {
+
+	struct qb_ipcs_service_handlers sh; 
+
+	printf("thread_ipc_poll\n");
+
+    sh.connection_accept = s1_connection_accept_fn;
+    sh.connection_created = s1_connection_created_fn;
+    sh.msg_process = s1_msg_process_fn;
+    sh.connection_destroyed = s1_connection_destroyed_fn;
+    sh.connection_closed = s1_connection_closed_fn;
+
+	s1 = qb_ipcs_create("myipcserver", 0, QB_IPC_SHM, &sh);
+
+	struct qb_ipcs_poll_handlers ph;
+
+    ph.job_add = my_job_add;
+    ph.dispatch_add = my_dispatch_add;
+    ph.dispatch_mod = my_dispatch_mod;
+    ph.dispatch_del = my_dispatch_del;
+
+	bms_loop = qb_loop_create();
+	qb_ipcs_poll_handlers_set(s1, &ph);
+	
+	printf("thread_ipc_poll\n");
+	int rc = qb_ipcs_run(s1);
+	
+	qb_loop_run(bms_loop);
+}
+
+void after(uv_work_t *req, int status) {
+	printf("after");
+}
+
+void process_message(uv_async_t *handle, int status) {
+	printf("process_message\n");
+	my_async_data* async_data = (my_async_data*)(handle->data);
+
+	void* data = async_data->data;
+	qb_ipcs_connection_t * c = async_data->c;
+
+	struct qb_ipc_request_header *hdr;
+	struct my_req *req_pt;	
+
+	hdr = (struct qb_ipc_request_header *)data;
+
+	req_pt = (struct my_req *)data;
+
+	printf("%d\n", req_pt->len);
+	printf("%s\n", req_pt->message);
+
+	node::Buffer *buffer = node::Buffer::New(req_pt->len);
+
+	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
+	
+	const unsigned argc1 = 0;
+	Local<Value> argv1[argc1] = { };
+
+	Handle<Object> client = IpcConn::NewInstance();
+	client->SetInternalField(0, External::New(c));
+
+	const unsigned argc = 3;	
+	
+	Local<Value> argv[argc]	= {Local<Value>::New(client),
+				   Local<Value>::New(String::New("data")),
+				   Local<Value>::New(buffer->handle_)};
+
+	printf("call\n");
+	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
+
+}
+
 Handle<Value> IpcServer_Listen(const Arguments& args) {
 	HandleScope scope;
 
@@ -123,29 +186,13 @@ Handle<Value> IpcServer_Listen(const Arguments& args) {
 
 	qb_ipc_type type = (qb_ipc_type)args[1]->NumberValue();
 
-	cb_ = Local<Function>::Cast(args[2]);
-
-	struct qb_ipcs_service_handlers sh; 
-        sh.connection_accept = s1_connection_accept_fn;
-        sh.connection_created = s1_connection_created_fn;
-        sh.msg_process = s1_msg_process_fn;
-        sh.connection_destroyed = s1_connection_destroyed_fn;
-        sh.connection_closed = s1_connection_closed_fn;
-
-	struct qb_ipcs_poll_handlers ph;
-        ph.job_add = my_job_add;
-       	ph.dispatch_add = my_dispatch_add;
-       	ph.dispatch_mod = my_dispatch_mod;
-       	ph.dispatch_del = my_dispatch_del;
-
-	s1 = qb_ipcs_create(path.c_str(), 0, type, &sh);
-	bms_loop = qb_loop_create();
-	qb_ipcs_poll_handlers_set(s1, &ph);
+	cb_ = Persistent<Function>::New(
+			Local<Function>::Cast(args[2]));
 	
-	int rc = qb_ipcs_run(s1);
-	
-	qb_loop_run(bms_loop);
+	uv_work_t * req = new uv_work_t;
 
+	uv_async_init(uv_default_loop(), &async, process_message);
+	uv_queue_work(uv_default_loop(), req, thread_ipc_poll, after);
 
 	return scope.Close(Undefined());
 }
