@@ -50,7 +50,7 @@ send(Pid, Bin) ->
     send(Pid, Bin, infinity).
 
 send(Pid, Bin, Timeout) ->
-    erlnode_vm:call(Pid, Bin, Timeout).
+    erlnode_vm:send(Pid, Bin, Timeout).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

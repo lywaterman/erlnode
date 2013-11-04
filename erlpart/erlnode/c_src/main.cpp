@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include "erlnode.hpp"
-#include "errors.hpp"
 
 extern "C" {
     #include <qb/qbdefs.h>
     #include <qb/qbutil.h>
     #include <qb/qbipcc.h>
     #include <qb/qblog.h>
-
 }
 
 #define ONE_MEG 1048576
@@ -56,8 +54,8 @@ static ERL_NIF_TERM start(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
             return enif_make_badarg(env);
         }
 
-		ErlNifPid pid;
-		if (!enif_get_local_pid(env, argv[0], &pid)) {
+	ErlNifPid pid;
+	if (!enif_get_local_pid(env, argv[0], &pid)) {
         	throw errors::invalid_type("invalid_pid");
     	}
 
@@ -65,7 +63,7 @@ static ERL_NIF_TERM start(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
 
         ERL_NIF_TERM result = enif_make_resource(env, vm);
 
-		vm->conn = qb_ipcc_connect("myipcserver", MAX_MSG_SIZE);
+	vm->conn = qb_ipcc_connect("myipcserver", MAX_MSG_SIZE);
 
         return enif_make_tuple2(env, atoms.ok, result);
     }
@@ -99,23 +97,25 @@ static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     	    throw errors::invalid_type("invalid_pid");
     	}	
 
-		struct my_req req;
-		memset(&req, 0, sizeof(req));
+	struct my_req req;
+	memset(&req, 0, sizeof(req));
 
-		memcpy(req.message, binary.data, binary.size);
-		req.len = binary.size;
-		req.pid = (int64_t)pid.pid;
+	memcpy(req.message, binary.data, binary.size);
+	req.len = binary.size;
+	req.pid = (int64_t)pid.pid;
 
-		req.hdr.id = QB_IPC_MSG_USER_START + 3;
-		req.hdr.size = sizeof(struct my_req);
+	printf("pid %ld\n", req.pid);
 
-		qb_ipcc_send(vm->conn, &req, req.hdr.size);	
+	req.hdr.id = QB_IPC_MSG_USER_START + 3;
+	req.hdr.size = sizeof(struct my_req);
 
-		// struct my_res res;
-		//		
-		//memset(&res, 0, sizeof(res));
-		//int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
-		//printf("%s\n", res.message);
+	qb_ipcc_send(vm->conn, &req, req.hdr.size);	
+
+	// struct my_res res;
+	//		
+	//memset(&res, 0, sizeof(res));
+	//int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
+	//printf("%s\n", res.message);
 
         return atoms.ok;
     }
@@ -132,7 +132,7 @@ static ErlNifFunc nif_funcs[] = {
     {"send", 3, send}
 };
 
-ERL_NIF_INIT(moon_nif, nif_funcs, &init, NULL, NULL, NULL)
+ERL_NIF_INIT(erlnode_nif, nif_funcs, &init, NULL, NULL, NULL)
 
 /////////////////////////////////////////////////////////////////////////////
 

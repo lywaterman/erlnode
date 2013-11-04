@@ -1,5 +1,4 @@
 #include "erlnode.hpp"
-#include "errors.hpp"
 
 #include <dlfcn.h>
 #include <unistd.h>
@@ -24,10 +23,12 @@ void send_result_caller(vm_t & vm, std::string const& type, my_res & response)
     result_array[0] = enif_make_atom(env, "ok");
     result_array[1] = response_to_erlbinary(env, response);
 
-	ERL_NIF_TERM result = enif_make_tuple_from_array(env, &result, 2);
+	ERL_NIF_TERM result = enif_make_tuple_from_array(env, result_array, 2);
 
 	ErlNifPid caller;
 	caller.pid = response.pid;
+
+	printf("pid %ld\n", response.pid);
 
 	ERL_NIF_TERM packet[3];
     packet[0] = enif_make_atom(env, type.c_str());
@@ -86,21 +87,23 @@ void vm_t::run()
 			//memset(&res, 0, sizeof(res));
 			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
 			//printf("%s\n", res.message);
-			printf("123123123123123\n");
+			sleep(0);
+
 			if (this->conn != NULL) {
 				struct my_res res;
 				memset(&res, 0, sizeof(res));
 
 				int rc = qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
-				if (rc > 0) {
+				
+				if (res.pid > 0) {
 										
+					printf("123123123123123\n");
 					send_result_caller(*this, "erlnode_response", res);
 
 					printf("%s\n", res.message);
 				}
 			}
 
-			//sleep(1000);
             //perform_task<call_handler>(*this);
 		}
     }

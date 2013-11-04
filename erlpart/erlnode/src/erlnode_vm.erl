@@ -24,17 +24,16 @@ send(Pid, Bin, Timeout) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private api:
 
--record(state, {vm, callback}).
+-record(state, {vm}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 init(Options) ->
-    Callback = proplists:get_value(callback, Options),
     {ok, VM} = erlnode_nif:start(self()),
-    {ok, #state{vm=VM, callback=Callback}}.
+    {ok, #state{vm=VM}}.
 
-handle_call({send, Fun, Args, Caller}, _, State=#state{vm=VM}) when is_list(Args) ->
-    ok = erlnode_nif:call(VM, to_atom(Fun), Args, Caller),
+handle_call({send, Bin, Caller}, _, State=#state{vm=VM}) ->
+    ok = erlnode_nif:send(VM, Bin, Caller),
     {reply, ok, State}.
 
 handle_cast(_, State) ->
@@ -57,64 +56,6 @@ receive_response_self() ->
             Response
 	end.
 
-
-receive_response_call(State=#state{vm=VM, callback=Callback}, Caller) ->
-    receive
-        {erlnode_response, Response, Caller} ->
-            Response;
-        {erlnode_callback, Args} ->
-            try
-                case handle_callback(Callback, Args) of
-                    {error, Result} -> erlnode_nif:result(VM, [{error, true}, {result, Result}]);
-                    {ok, Result}    -> erlnode_nif:result(VM, [{error, false}, {result, Result}]);
-                    Result          -> erlnode_nif:result(VM, [{error, false}, {result, Result}])
-                end
-            catch _:Error ->
-                erlnode_nif:result(VM, [{error, true}, {result, Error}])
-            end,
-            receive_response(State)
-        %%Other ->
-        %%    error({invalid_response, Other})
-    end.
-
-
-receive_response(State=#state{vm=VM, callback=Callback}) ->
-    receive
-        {erlnode_response, Response} ->
-            Response;
-        {erlnode_callback, Args} ->
-            try
-                case handle_callback(Callback, Args) of
-                    {error, Result} -> erlnode_nif:result(VM, [{error, true}, {result, Result}]);
-                    {ok, Result}    -> erlnode_nif:result(VM, [{error, false}, {result, Result}]);
-                    Result          -> erlnode_nif:result(VM, [{error, false}, {result, Result}])
-                end
-            catch _:Error ->
-                erlnode_nif:result(VM, [{error, true}, {result, Error}])
-            end,
-            receive_response(State);
-        Other ->
-            error({invalid_response, Other})
-    end.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-handle_callback(undefined, {Mod, Fun, Args}) ->
-    erlang:apply(to_atom(Mod),to_atom(Fun),Args);
-
-handle_callback(Callback, Args) when is_function(Callback) ->
-    Callback(Args);
-
-handle_callback({Mod, Fun}, Args) when is_atom(Mod), is_atom(Fun) ->
-    erlang:apply(Mod, Fun, Args);
-
-handle_callback({Mod, Fun, Args0}, Args1)
-        when is_atom(Mod), is_atom(Fun)
-           , is_list(Args0), is_list(Args1) ->
-    erlang:apply(Mod, Fun, Args0 ++ Args1);
-
-handle_callback(_, _) ->
-    error(invalid_call).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

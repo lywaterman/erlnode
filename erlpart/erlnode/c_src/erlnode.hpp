@@ -1,5 +1,6 @@
 #pragma once
 
+#include "errors.hpp"
 extern "C" {
     #include <qb/qbdefs.h>
     #include <qb/qbutil.h>

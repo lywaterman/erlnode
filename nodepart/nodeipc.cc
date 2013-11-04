@@ -42,6 +42,7 @@ s1_connection_created_fn(qb_ipcs_connection_t * c)
 {
 	struct qb_ipcs_stats srv_stats;
 	
+	printf("created sdklfjkldsjfkldjsfkldklsf\n");
 	qb_ipcs_stats_get(s1, &srv_stats, QB_FALSE);
 	qb_log(LOG_INFO, "Connection created (active:%d, closed:%d)",
 		srv_stats.active_connections, srv_stats.closed_connections);
@@ -50,12 +51,14 @@ s1_connection_created_fn(qb_ipcs_connection_t * c)
 static void
 s1_connection_destroyed_fn(qb_ipcs_connection_t *c)
 {
+	printf("destroyed sdklfjkldsjfkldjsfkldklsf\n");
 	qb_log(LOG_INFO, "Connection about to be freed");
 }
 
 static int32_t
 s1_connection_closed_fn(qb_ipcs_connection_t *c)
 {
+	printf("close sdklfjkldsjfkldjsfkldklsf\n");
 	return 0;
 }
 

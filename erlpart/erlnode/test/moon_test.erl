@@ -6,21 +6,48 @@ the_test_() ->
         fun setup/0,
         fun teardown/1,
         [
-            {"Starting/Stopping the VM",
-                fun() -> ok end
-            },
+            %%{"Starting/Stopping the VM",
+            %%    fun() -> ok end
+            %%},
             {"Erlang -> Lua type mapping",
                 fun() ->
-                    Script = <<"function test(Arg, Type) return type(Arg) == Type end">>,
-                    ?assertMatch({ok, undefined}, moon:eval(vm, Script)),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [nil, <<"nil">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [true, <<"boolean">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [false, <<"boolean">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [42, <<"number">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [42.5, <<"number">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [hello, <<"string">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [<<"hello">>, <<"string">>])),
-                    ?assertMatch({ok, true}, moon:call(vm, test, [[], <<"table">>]))
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>),
+			erlnode:send(vm, <<"121123">>)
+                    %%Script = <<"function test(Arg, Type) return type(Arg) == Type end">>,
+                    %%?assertMatch({ok, undefined}, moon:eval(vm, Script)),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [nil, <<"nil">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [true, <<"boolean">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [false, <<"boolean">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [42, <<"number">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [42.5, <<"number">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [hello, <<"string">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [<<"hello">>, <<"string">>])),
+                    %%?assertMatch({ok, true}, moon:call(vm, test, [[], <<"table">>]))
                 end
             }
             %%{"Lua -> Erlang type mapping",
@@ -52,12 +79,12 @@ the_test_() ->
 
 setup() ->
     error_logger:tty(false),
-    application:start(moon),
-    {ok, Res} = moon:start_vm(),
+    application:start(erlnode),
+    {ok, Res} = erlnode:start_vm(),
     register(vm, Res).
 
 teardown(_) ->
-    ok = moon:stop_vm(whereis(vm)),
-    application:stop(moon).
+    ok = erlnode:stop_vm(whereis(vm)),
+    application:stop(erlnode).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

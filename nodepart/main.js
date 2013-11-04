@@ -27,11 +27,11 @@ addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
 
 )
 
-setInterval(function() { 
-	if (client1 != null) {
-		client1.send("hello erlang test")
-	}
-
-}, 2000)
+//setInterval(function() { 
+//	if (client1 != null) {
+//		client1.send("hello erlang test")
+//	}
+//
+//}, 2000)
 
 console.log("not block")
