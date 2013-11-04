@@ -1,0 +1,13 @@
+%% -*- erlang -*-
+{application, erlnode,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erlnode_app, []}},
+  {env, []}
+ ]}.

@@ -18,7 +18,7 @@ void IpcConn::Init(Handle<Object> exports) {
 	// Prepare constructor template
 	Local<FunctionTemplate> tpl = FunctionTemplate::New(New);
 	tpl->SetClassName(String::NewSymbol("IpcConn"));
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+	tpl->InstanceTemplate()->SetInternalFieldCount(2);
 
 	//Prototype
 	tpl->PrototypeTemplate()->Set(String::NewSymbol("send"),
@@ -76,8 +76,12 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	Local<Object> self = args.Holder();
 	Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
+	Local<External> wrap1 = Local<External>::Cast(self->GetInternalField(1));
 
 	qb_ipcs_connection_t * c = (qb_ipcs_connection_t *)(wrap->Value());
+	int64_t* pid = (int64_t*)(wrap1->Value());
+
+	res.pid = *pid;
 
 	qb_ipcs_event_send(c, &res, sizeof(res));
 	//qb_ipcs_response_send(c, &res, sizeof(res));

@@ -62,7 +62,6 @@ s1_connection_closed_fn(qb_ipcs_connection_t *c)
 static int32_t
 s1_msg_process_fn(qb_ipcs_connection_t * c, void *data, size_t size)
 {
-
 	async_data.c = c;
 	async_data.data = data;
 
@@ -160,6 +159,7 @@ void process_message(uv_async_t *handle, int status) {
 
 	Handle<Object> client = IpcConn::NewInstance();
 	client->SetInternalField(0, External::New(c));
+	client->SetInternalField(1, External::New(&(req_pt->pid)));
 
 	const unsigned argc = 3;	
 	
