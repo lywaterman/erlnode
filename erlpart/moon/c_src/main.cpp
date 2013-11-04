@@ -149,23 +149,22 @@ static ERL_NIF_TERM call(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         lua::vm_t::tasks::call_t call(fun, args, caller_pid);
         vm->add_task(lua::vm_t::task_t(call));
 
-	struct my_req req;
-	struct my_res res;
-	
-	memset(req.message, 0, sizeof(req.message));
+		//struct my_req req;
+		//struct my_res res;
+		//
+		//memset(req.message, 0, sizeof(req.message));
 
-	sprintf(req.message, "hello node\n");
+		//sprintf(req.message, "hello node\n");
 
-	req.hdr.id = QB_IPC_MSG_USER_START + 3;
-	req.hdr.size = sizeof(struct my_req);
-	req.len = 10;
+		//req.hdr.id = QB_IPC_MSG_USER_START + 3;
+		//req.hdr.size = sizeof(struct my_req);
+		//req.len = 10;
 
-	qb_ipcc_send(vm->conn, &req, req.hdr.size);	
-			
-	memset(&res, 0, sizeof(res));
-	int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
-	printf("%s\n", res.message);
-
+		//qb_ipcc_send(vm->conn, &req, req.hdr.size);	
+		//		
+		//memset(&res, 0, sizeof(res));
+		//int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
+		//printf("%s\n", res.message);
 
         return atoms.ok;
     }

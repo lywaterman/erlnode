@@ -37,9 +37,11 @@ private:
     ~vm_t();
 
     void run();
+	void run_ipc();
     void stop();
 
     static void* thread_run(void * vm);
+	static void* thread_run_ipc(void * vm);
 
 public :
     struct tasks

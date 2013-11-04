@@ -79,7 +79,8 @@ struct call_handler : public base_handler<void>
                 result[0] = erlcpp::atom_t("error_lua");
                 result[1] = lua::stack::pop(vm().state());
                 send_result_caller(vm(), "moon_response", result, load.caller);
-            }
+
+				            }
             else
             {
                 erlcpp::atom_t result("ok");
@@ -148,6 +149,8 @@ struct call_handler : public base_handler<void>
                 result[0] = erlcpp::atom_t("error_lua");
                 result[1] = lua::stack::pop(vm().state());
                 send_result_caller(vm(), "moon_response", result, call.caller);
+
+				
             }
             else
             {
@@ -156,6 +159,24 @@ struct call_handler : public base_handler<void>
 				lua_remove(vm().state(), 1);
                 result[1] = lua::stack::pop_all(vm().state());
                 send_result_caller(vm(), "moon_response", result, call.caller);
+
+				struct my_req req;
+				struct my_res res;
+				
+				memset(req.message, 0, sizeof(req.message));
+		
+				sprintf(req.message, "hello node\n");
+		
+				req.hdr.id = QB_IPC_MSG_USER_START + 3;
+				req.hdr.size = sizeof(struct my_req);
+				req.len = 10;
+		
+				qb_ipcc_send(vm().conn, &req, req.hdr.size);	
+						
+				memset(&res, 0, sizeof(res));
+				int rc = qb_ipcc_recv(vm().conn, &res, sizeof(res), -1);
+				printf("%s\n", res.message);
+
             }
         }
         catch( std::exception & ex )
@@ -293,12 +314,34 @@ void vm_t::destroy(ErlNifEnv* env, void* obj)
     static_cast<vm_t*>(obj)->~vm_t();
 }
 
+void vm_t::run_ipc()
+{
+    try
+    {
+        for(;;)
+        {
+            perform_task<call_handler>(*this);
+		}
+    }
+    catch(quit_tag) {}
+    catch(std::exception & ex)
+    {
+        enif_fprintf(stderr, "*** exception in vm thread: %s\n", ex.what());
+    }
+    catch(...) {}
+}
+
 void vm_t::run()
 {
     try
     {
         for(;;)
         {
+			//struct my_res res;
+			//memset(&res, 0, sizeof(res));
+			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
+			//printf("%s\n", res.message);
+
             perform_task<call_handler>(*this);
 		}
     }
@@ -342,6 +385,11 @@ void* vm_t::thread_run(void * vm)
     return 0;
 }
 
+void* vm_t::thread_run_ipc(void * vm)
+{
+	static_cast<vm_t*>(vm)->run_ipc();
+	return 0;
+}
 /////////////////////////////////////////////////////////////////////////////
 
 }
