@@ -526,17 +526,15 @@ console.log(xx.send)
 var client1 = null
 addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
 	console.log('---------------------------------------------------')
-
 	var buffer_len = data.length
-	console.log(buffer_len)
 	var final_string = ""
 	for (var i=0; i<buffer_len; i++) {
-		console.log(data[i])
 		final_string = final_string + String.fromCharCode(data[i])
 	}
 	console.log(final_string[0] == String.fromCharCode(131))	
 
 	var cc = bert.decode(final_string)
+	
 	console.log(cc)
 	client.send("hello erlang")
 	client1 = client
