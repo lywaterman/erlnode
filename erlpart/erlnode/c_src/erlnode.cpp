@@ -3,6 +3,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include <assert.h>
+
 namespace erlnode {
 
 ERL_NIF_TERM response_to_erlbinary(ErlNifEnv* env, my_res & response) {
@@ -28,7 +30,7 @@ void send_result_caller(vm_t & vm, std::string const& type, my_res & response)
 	ErlNifPid caller;
 	caller.pid = response.pid;
 
-	printf("pid %ld\n", response.pid);
+	//printf("pid %ld\n", response.pid);
 
 	ERL_NIF_TERM packet[3];
     packet[0] = enif_make_atom(env, type.c_str());
@@ -46,6 +48,7 @@ void send_result_caller(vm_t & vm, std::string const& type, my_res & response)
 vm_t::vm_t(ErlNifPid const& pid)
     : pid_(pid) 
 {
+	stop_thread = false;
 	conn = NULL;
 }
 
@@ -58,7 +61,7 @@ vm_t::~vm_t()
 
 vm_t* vm_t::create(ErlNifResourceType* res_type, ErlNifPid const& pid)
 {
-    enif_fprintf(stdout, "vm_t create------------------------------------------------------------------\n");
+    //enif_fprintf(stdout, "vm_t create------------------------------------------------------------------\n");
     void * buf = enif_alloc_resource(res_type, sizeof(vm_t));
     // TODO: may leak, need to guard agaist
 	//enif_release_resource
@@ -87,24 +90,27 @@ void vm_t::run()
 			//memset(&res, 0, sizeof(res));
 			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
 			//printf("%s\n", res.message);
-			sleep(0);
 
+			sleep(0);
 			if (this->conn != NULL) {
 				struct my_res res;
 				memset(&res, 0, sizeof(res));
 
-				int rc = qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
+				qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
 				
 				if (res.pid > 0) {
 										
-					printf("123123123123123\n");
+					//printf("123123123123123\n");
 					send_result_caller(*this, "erlnode_response", res);
 
-					printf("%s\n", res.message);
+					//printf("%s\n", res.message);
 				}
 			}
 
             //perform_task<call_handler>(*this);
+			if (this->stop_thread) {
+				break;
+			} 
 		}
     }
     catch(std::exception & ex)
@@ -116,6 +122,7 @@ void vm_t::run()
 
 void vm_t::stop()
 {
+	stop_thread = true;
     enif_thread_join(tid_, NULL);
 };
 

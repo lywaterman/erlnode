@@ -104,7 +104,7 @@ static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	req.len = binary.size;
 	req.pid = (int64_t)pid.pid;
 
-	printf("pid %ld\n", req.pid);
+	//printf("pid %ld\n", req.pid);
 
 	req.hdr.id = QB_IPC_MSG_USER_START + 3;
 	req.hdr.size = sizeof(struct my_req);

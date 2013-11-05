@@ -38,7 +38,7 @@ private:
     static void* thread_run(void * vm);
 
 public :
-
+	bool stop_thread;
     ErlNifPid erl_pid() const { return pid_; }
 
     static void destroy(ErlNifEnv* env, void* obj);
