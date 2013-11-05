@@ -42,7 +42,7 @@ s1_connection_created_fn(qb_ipcs_connection_t * c)
 {
 	struct qb_ipcs_stats srv_stats;
 	
-	printf("created sdklfjkldsjfkldjsfkldklsf\n");
+	//printf("created sdklfjkldsjfkldjsfkldklsf\n");
 	qb_ipcs_stats_get(s1, &srv_stats, QB_FALSE);
 	qb_log(LOG_INFO, "Connection created (active:%d, closed:%d)",
 		srv_stats.active_connections, srv_stats.closed_connections);
@@ -51,14 +51,14 @@ s1_connection_created_fn(qb_ipcs_connection_t * c)
 static void
 s1_connection_destroyed_fn(qb_ipcs_connection_t *c)
 {
-	printf("destroyed sdklfjkldsjfkldjsfkldklsf\n");
+	//printf("destroyed sdklfjkldsjfkldjsfkldklsf\n");
 	qb_log(LOG_INFO, "Connection about to be freed");
 }
 
 static int32_t
 s1_connection_closed_fn(qb_ipcs_connection_t *c)
 {
-	printf("close sdklfjkldsjfkldjsfkldklsf\n");
+	//printf("close sdklfjkldsjfkldjsfkldklsf\n");
 	return 0;
 }
 
@@ -70,7 +70,7 @@ s1_msg_process_fn(qb_ipcs_connection_t * c, void *data, size_t size)
 
 	async.data = (void*)(&async_data);
 
-	printf("async sdklfjkldsjfkldjsfkldklsf\n");
+	//printf("async sdklfjkldsjfkldjsfkldklsf\n");
 	uv_async_send(&async);
 
 	return 0;
@@ -106,7 +106,7 @@ void thread_ipc_poll(uv_work_t *req) {
 
 	struct qb_ipcs_service_handlers sh; 
 
-	printf("thread_ipc_poll\n");
+	//printf("thread_ipc_poll\n");
 
     sh.connection_accept = s1_connection_accept_fn;
     sh.connection_created = s1_connection_created_fn;
@@ -126,18 +126,18 @@ void thread_ipc_poll(uv_work_t *req) {
 	bms_loop = qb_loop_create();
 	qb_ipcs_poll_handlers_set(s1, &ph);
 	
-	printf("thread_ipc_poll\n");
+	//printf("thread_ipc_poll\n");
 	int rc = qb_ipcs_run(s1);
 	
 	qb_loop_run(bms_loop);
 }
 
 void after(uv_work_t *req, int status) {
-	printf("after");
+	//printf("after");
 }
 
 void process_message(uv_async_t *handle, int status) {
-	printf("process_message\n");
+	//printf("process_message\n");
 	my_async_data* async_data = (my_async_data*)(handle->data);
 
 	void* data = async_data->data;
@@ -150,8 +150,8 @@ void process_message(uv_async_t *handle, int status) {
 
 	req_pt = (struct my_req *)data;
 
-	printf("%d\n", req_pt->len);
-	printf("%s\n", req_pt->message);
+	//printf("%d\n", req_pt->len);
+	//printf("%s\n", req_pt->message);
 
 	//node::Buffer *buffer = node::Buffer::New(req_pt->len);
 
@@ -170,7 +170,7 @@ void process_message(uv_async_t *handle, int status) {
 				   Local<Value>::New(String::New("data")),
 				   Local<Value>::New(String::New(req_pt->message, req_pt->len))};
 
-	printf("call\n");
+	//printf("call\n");
 	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
 
 }

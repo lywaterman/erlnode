@@ -32,7 +32,7 @@ Handle<Value> IpcConn::New(const Arguments& args) {
 	HandleScope scope;
 
 	if (args.IsConstructCall()) {
-		printf("construct call\n");
+		//printf("construct call\n");
 		
 		IpcConn *obj = new IpcConn();
 		obj->Wrap(args.This());
@@ -65,14 +65,14 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	int str_len = str->Length();
 
-	printf("str_len:%d\n", str_len);
+	//printf("str_len:%d\n", str_len);
 
 	res.hdr.size = sizeof(struct my_res);
 	res.len = str_len;
 
 	str->WriteAscii(res.message, 0, str_len);
 
-	printf("message: %s\n", res.message);
+	//printf("message: %s\n", res.message);
 
 	Local<Object> self = args.Holder();
 	Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
@@ -84,13 +84,13 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	res.pid = *pid;
 
-	printf("pid %ld\n", res.pid);
+	//printf("pid %ld\n", res.pid);
 
 	qb_ipcs_event_send(c, &res, sizeof(res));
 
 	//qb_ipcs_response_send(c, &res, sizeof(res));
 
-	printf("connect: %ld\n", (long)c);
+	//printf("connect: %ld\n", (long)c);
 
 	return scope.Close(Undefined());
 }

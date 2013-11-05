@@ -1,4 +1,4 @@
-APP=moon
+APP=erlnode
 REBAR ?= $(shell which rebar 2>/dev/null || which ./rebar)
 
 .PHONY: test
@@ -30,7 +30,7 @@ start:
 
 teststart:
 	exec erl -pa ebin deps/*/ebin -boot start_sasl -s $(APP) \
-		-eval "{ok,X} = moon:start_vm(), register(vm, X)".
+		-eval "{ok,X} = erlnode:start_vm(), register(vm, X)".
 
 test:
 	mkdir -p .eunit
