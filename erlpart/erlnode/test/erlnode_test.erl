@@ -11,30 +11,15 @@ the_test_() ->
             },
             {"Erlang -> Lua type mapping",
                 fun() ->
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>)
-                end
-            },
-            {"Lua -> Erlang type mapping",
-                fun() ->
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>),
-					erlnode:send(vm, <<"121123">>)
+					erlnode:send(vm, bert:encode(<<"1234">>)),
+					erlnode:send(vm, bert:encode([{<<"call">>}, <<"async">>, <<"do">>,<<"121123">>]))
                 end
             }
+            %%{"Lua -> Erlang type mapping",
+            %%    fun() ->
+			%%		erlnode:send(vm, bert:encode([<<"call">>, <<"async">>, <<"do">>,<<"121123">>]))
+            %%    end
+            %%}
         ]
     }.
 

@@ -65,12 +65,17 @@ s1_connection_closed_fn(qb_ipcs_connection_t *c)
 static int32_t
 s1_msg_process_fn(qb_ipcs_connection_t * c, void *data, size_t size)
 {
+	struct my_req *req_pt;	
+	req_pt = (struct my_req *)data;
+
+	printf("dsfdsfdsf");
+	printf("%d\n", req_pt->message[0]);
+	
 	async_data.c = c;
 	async_data.data = data;
 
 	async.data = (void*)(&async_data);
 
-	//printf("async sdklfjkldsjfkldjsfkldklsf\n");
 	uv_async_send(&async);
 
 	return 0;
@@ -153,9 +158,9 @@ void process_message(uv_async_t *handle, int status) {
 	//printf("%d\n", req_pt->len);
 	//printf("%s\n", req_pt->message);
 
-	//node::Buffer *buffer = node::Buffer::New(req_pt->len);
+	node::Buffer *buffer = node::Buffer::New(req_pt->len);
 
-	//memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
+	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
 	
 	const unsigned argc1 = 0;
 	Local<Value> argv1[argc1] = { };
@@ -163,12 +168,15 @@ void process_message(uv_async_t *handle, int status) {
 	Handle<Object> client = IpcConn::NewInstance();
 	client->SetInternalField(0, External::New(c));
 	client->SetInternalField(1, External::New(&(req_pt->pid)));
-
+	
+	printf("size %d\n", req_pt->len);
+	printf("%d\n", req_pt->message[0]);
 	const unsigned argc = 3;	
 	
 	Local<Value> argv[argc]	= {Local<Value>::New(client),
 				   Local<Value>::New(String::New("data")),
-				   Local<Value>::New(String::New(req_pt->message, req_pt->len))};
+				   //Local<Value>::New(String::New(req_pt->message, req_pt->len))};
+				   Local<Value>::New(buffer->handle_)};
 
 	//printf("call\n");
 	cb_->Call(Context::GetCurrent()->Global(), argc, argv);

@@ -100,6 +100,7 @@ static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 	struct my_req req;
 	memset(&req, 0, sizeof(req));
 
+	printf("binary size %d\n", binary.size);
 	memcpy(req.message, binary.data, binary.size);
 	req.len = binary.size;
 	req.pid = (int64_t)pid.pid;

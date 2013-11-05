@@ -86,7 +86,7 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	//printf("pid %ld\n", res.pid);
 
-	printf("res %s\n", res.message);
+	//printf("res %s\n", res.message);
 	qb_ipcs_event_send(c, &res, sizeof(res));
 
 	//qb_ipcs_response_send(c, &res, sizeof(res));
