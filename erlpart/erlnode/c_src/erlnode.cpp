@@ -12,7 +12,7 @@ ERL_NIF_TERM response_to_erlbinary(ErlNifEnv* env, my_res & response) {
     if (!enif_alloc_binary(response.len, &binary)) {
         throw errors::enomem();
     }
-    memcpy(response.message, binary.data, response.len);
+    memcpy(binary.data, response.message, response.len);
     return enif_make_binary(env, &binary);
 }
 

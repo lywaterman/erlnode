@@ -1,5 +1,6 @@
 #include <node.h>
 #include "ipcconn.h"
+#include "node_buffer.h"
 
 using namespace v8;
 
@@ -61,18 +62,13 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 	struct my_res res;
 	memset(&res, 0, sizeof(res));
 
-	v8::String *str = (*args[0]->ToString());
-
-	int str_len = str->Length();
-
-	//printf("str_len:%d\n", str_len);
+	size_t buffersize = node::Buffer::Length(args[0]->ToObject());
+	char* bufferdata = node::Buffer::Data(args[0]->ToObject());
 
 	res.hdr.size = sizeof(struct my_res);
-	res.len = str_len;
-
-	str->WriteAscii(res.message, 0, str_len);
-
-	//printf("message: %s\n", res.message);
+	res.len = buffersize;
+		
+	memcpy(res.message, bufferdata, buffersize);
 
 	Local<Object> self = args.Holder();
 	Local<External> wrap = Local<External>::Cast(self->GetInternalField(0));
@@ -86,7 +82,6 @@ Handle<Value> IpcConn::Send(const v8::Arguments& args) {
 
 	//printf("pid %ld\n", res.pid);
 
-	//printf("res %s\n", res.message);
 	qb_ipcs_event_send(c, &res, sizeof(res));
 
 	//qb_ipcs_response_send(c, &res, sizeof(res));

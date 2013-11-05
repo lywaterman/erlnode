@@ -11,8 +11,8 @@ the_test_() ->
             },
             {"Erlang -> Lua type mapping",
                 fun() ->
-					erlnode:send(vm, bert:encode(<<"1234">>)),
-					erlnode:send(vm, bert:encode([{<<"call">>}, <<"async">>, <<"do">>,<<"121123">>]))
+			{ok, Res} = erlnode:send(vm, bert:encode({<<"call">>, <<"./test">>, <<"test_fun">>, [<<"121123">>]})),
+			?assertMatch(<<"121123">>, bert:decode(Res))
                 end
             }
             %%{"Lua -> Erlang type mapping",

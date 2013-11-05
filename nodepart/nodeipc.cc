@@ -155,9 +155,9 @@ void process_message(uv_async_t *handle, int status) {
 	//printf("%d\n", req_pt->len);
 	//printf("%s\n", req_pt->message);
 
-	node::Buffer *buffer = node::Buffer::New(req_pt->len);
+	node::Buffer *buffer = node::Buffer::New(req_pt->message, req_pt->len);
 
-	memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
+	//memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
 	
 	const unsigned argc1 = 0;
 	Local<Value> argv1[argc1] = { };

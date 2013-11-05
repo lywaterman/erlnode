@@ -523,30 +523,37 @@ console.log('Server running at http://127.0.0.1:1337/');
 
 console.log(xx.send)
 
-var client1 = null
+function get_op(data) {
+	return bert.decode(data.toString('binary'))
+}
+
+function string_to_buffer (string) {
+      return new Buffer(string, 'binary');
+}
+
+function excute_call(client, op) {
+	//先看是否为call
+	if (op.type != 'tuple' || op.value[0] != 'call') {
+		return
+	}
+
+	console.log("is call")
+	var module = require(op.value[1])
+	var fun_name = op.value[2]
+	var args = op.value[3]	
+	var result = bert.encode(module[fun_name](args))
+	
+	client.send(string_to_buffer(result))
+}
+
 addon.ipcserver_listen("myipcserver", 1, function(client, event, data) {
 	console.log('---------------------------------------------------')
-	var buffer_len = data.length
-	var final_string = ""
-	for (var i=0; i<buffer_len; i++) {
-		final_string = final_string + String.fromCharCode(data[i])
-	}
-	console.log(final_string[0] == String.fromCharCode(131))	
-
-	var cc = bert.decode(final_string)
 	
-	console.log(cc)
-	client.send("hello erlang")
-	client1 = client
+	var op = get_op(data)	
+	console.log(op)
+	var res = excute_call(client, op)
 }
 
 )
-
-//setInterval(function() { 
-//	if (client1 != null) {
-//		client1.send("hello erlang test")
-//	}
-//
-//}, 2000)
 
 console.log("not block")
