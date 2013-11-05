@@ -91,19 +91,16 @@ void vm_t::run()
 			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
 			//printf("%s\n", res.message);
 
-			sleep(0);
+			//sleep(0);
 			if (this->conn != NULL) {
 				struct my_res res;
 				memset(&res, 0, sizeof(res));
 
-				qb_ipcc_event_recv(this->conn, &res, sizeof(res), -1);
+				qb_ipcc_event_recv(this->conn, &res, sizeof(res), 0);
 				
 				if (res.pid > 0) {
-										
-					//printf("123123123123123\n");
-					send_result_caller(*this, "erlnode_response", res);
-
 					//printf("%s\n", res.message);
+					send_result_caller(*this, "erlnode_response", res);
 				}
 			}
 
