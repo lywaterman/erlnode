@@ -5,6 +5,7 @@ extern "C" {
     #include <qb/qbdefs.h>
     #include <qb/qbutil.h>
     #include <qb/qbipcc.h>
+    #include <qb/qbipcs.h>
     #include <qb/qblog.h>
 }
 
@@ -73,7 +74,8 @@ static ERL_NIF_TERM start(ErlNifEnv * env, int argc, const ERL_NIF_TERM argv[])
     }
 }
 
-static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+
+static ERL_NIF_TERM request(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     try
     {
@@ -87,12 +89,12 @@ static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         {
             return enif_make_badarg(env);
         }
-		ErlNifBinary binary;
+	ErlNifBinary binary;
     	if (!enif_inspect_binary(env, argv[1], &binary)) {
         	throw errors::invalid_type("invalid_binary");
     	}
 
-		ErlNifPid pid;
+	ErlNifPid pid;
     	if (!enif_get_local_pid(env, argv[2], &pid)) {
     	    throw errors::invalid_type("invalid_pid");
     	}	
@@ -129,7 +131,7 @@ static ERL_NIF_TERM send(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 static ErlNifFunc nif_funcs[] = {
     {"start", 1, start},
-    {"send", 3, send}
+    {"request", 3, request}
 };
 
 ERL_NIF_INIT(erlnode_nif, nif_funcs, &init, NULL, NULL, NULL)

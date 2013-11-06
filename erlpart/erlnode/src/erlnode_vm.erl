@@ -8,7 +8,7 @@
 
 %% api:
 -export([start_link/1]).
--export([send/3]).
+-export([request/3, call/5, load/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public api:
@@ -16,10 +16,17 @@
 start_link(Options) ->
     gen_server:start_link(?MODULE, Options, []).
 
-send(Pid, Bin, Timeout) ->
-	gen_server:call(Pid, {send, Bin, self()}, Timeout),
+call(Pid, M, F, A, Timeout) ->
+	request(Pid, bert:encode({<<"call">>, to_binary(M), to_binary(F), A}), Timeout).
+load(Pid, M, Timeout) ->
+	request(Pid, bert:encode({<<"load">>, to_binary(M)}), Timeout).
+
+request(Pid, Bin, Timeout) ->
+	gen_server:call(Pid, {request, Bin, self()}, Timeout),
 	receive_response_self().
 
+response(Pid, Bin) ->
+	gen_server:cast(Pid, {response, Bin, self()}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private api:
@@ -32,9 +39,13 @@ init(Options) ->
     {ok, VM} = erlnode_nif:start(self()),
     {ok, #state{vm=VM}}.
 
-handle_call({send, Bin, Caller}, _, State=#state{vm=VM}) ->
-    ok = erlnode_nif:send(VM, Bin, Caller),
+handle_call({request, Bin, Caller}, _, State=#state{vm=VM}) ->
+    ok = erlnode_nif:request(VM, Bin, Caller),
     {reply, ok, State}.
+
+handle_cast({response, Bin, Caller}, State=#state{vm=VM}) ->
+    ok = erlnode_nif:response(VM, Bin, Caller),
+    {noreply, State};
 
 handle_cast(_, State) ->
     {noreply, State}.

@@ -3,7 +3,7 @@
 -export([start/0, stop/0]).
 -export([start_vm/0, start_vm/1, stop_vm/1]).
 
--export([send/2, send/3]).
+-export([request/2, request/3, call/4, call/5]).
 
 -export([test/1]).
 
@@ -46,11 +46,17 @@ stop_vm(Pid) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-send(Pid, Bin) ->
-    send(Pid, Bin, infinity).
+call(Pid, M, F, A) ->
+    call(Pid, M, F, A, infinity). 
 
-send(Pid, Bin, Timeout) ->
-    erlnode_vm:send(Pid, Bin, Timeout).
+call(Pid, M, F, A, Timeout) ->
+    erlnode_vm:call(Pid, M, F, A, Timeout).
+
+request(Pid, Bin) ->
+    request(Pid, Bin, infinity).
+
+request(Pid, Bin, Timeout) ->
+    erlnode_vm:request(Pid, Bin, Timeout).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
