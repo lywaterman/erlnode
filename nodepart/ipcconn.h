@@ -22,6 +22,8 @@ struct my_res {
 	struct qb_ipc_response_header hdr;
 	int64_t pid;
 	int len;
+	int is_req;
+	int req_pid;
 	char message[256];
 };
 

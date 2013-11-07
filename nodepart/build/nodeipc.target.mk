@@ -31,9 +31,9 @@ CFLAGS_CC_Debug := \
 	-O3
 
 INCS_Debug := \
-	-I/root/.node-gyp/0.10.21/src \
-	-I/root/.node-gyp/0.10.21/deps/uv/include \
-	-I/root/.node-gyp/0.10.21/deps/v8/include \
+	-I/home/liuyang/.node-gyp/0.10.21/src \
+	-I/home/liuyang/.node-gyp/0.10.21/deps/uv/include \
+	-I/home/liuyang/.node-gyp/0.10.21/deps/v8/include \
 	-I/usr/include
 
 DEFS_Release := \
@@ -63,9 +63,9 @@ CFLAGS_CC_Release := \
 	-O3
 
 INCS_Release := \
-	-I/root/.node-gyp/0.10.21/src \
-	-I/root/.node-gyp/0.10.21/deps/uv/include \
-	-I/root/.node-gyp/0.10.21/deps/v8/include \
+	-I/home/liuyang/.node-gyp/0.10.21/src \
+	-I/home/liuyang/.node-gyp/0.10.21/deps/uv/include \
+	-I/home/liuyang/.node-gyp/0.10.21/deps/v8/include \
 	-I/usr/include
 
 OBJS := \

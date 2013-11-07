@@ -26,7 +26,7 @@ request(Pid, Bin, Timeout) ->
 	receive_response_self().
 
 response(Pid, Bin) ->
-	gen_server:cast(Pid, {response, Bin, self()}).
+	gen_server:cast(Pid, {request, Bin, self()}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Private api:
@@ -42,10 +42,6 @@ init(Options) ->
 handle_call({request, Bin, Caller}, _, State=#state{vm=VM}) ->
     ok = erlnode_nif:request(VM, Bin, Caller),
     {reply, ok, State}.
-
-handle_cast({response, Bin, Caller}, State=#state{vm=VM}) ->
-    ok = erlnode_nif:response(VM, Bin, Caller),
-    {noreply, State};
 
 handle_cast(_, State) ->
     {noreply, State}.
@@ -63,7 +59,7 @@ code_change(_, State, _) ->
 
 receive_response_self() ->
     receive
-        {erlnode_response, Response, Caller} ->
+        {nodeerl_response, Response, Caller} ->
             Response
 	end.
 
