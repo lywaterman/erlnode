@@ -99,7 +99,7 @@ static ERL_NIF_TERM request(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     	    throw errors::invalid_type("invalid_pid");
     	}	
 
-	struct my_req req;
+	struct my_proto req;
 	memset(&req, 0, sizeof(req));
 
 	memcpy(req.message, binary.data, binary.size);
@@ -108,16 +108,7 @@ static ERL_NIF_TERM request(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 
 	//printf("pid %ld\n", req.pid);
 
-	req.hdr.id = QB_IPC_MSG_USER_START + 3;
-	req.hdr.size = sizeof(struct my_req);
-
-	qb_ipcc_send(vm->conn, &req, req.hdr.size);	
-
-	// struct my_res res;
-	//		
-	//memset(&res, 0, sizeof(res));
-	//int rc = qb_ipcc_recv(vm->conn, &res, sizeof(res), -1);
-	//printf("%s\n", res.message);
+	qb_ipcc_send(vm->conn, &req, sizeof(req));	
 
         return atoms.ok;
     }
@@ -126,12 +117,56 @@ static ERL_NIF_TERM request(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
         return enif_make_tuple2(env, atoms.error, enif_make_atom(env, ex.what()));
     }
 }
+static ERL_NIF_TERM callback(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    try
+    {
+        if (argc != 3)
+        {
+            return enif_make_badarg(env);
+        }
 
+        erlnode::vm_t * vm = NULL;
+        if(!enif_get_resource(env, argv[0], res_type, reinterpret_cast<void**>(&vm)))
+        {
+            return enif_make_badarg(env);
+        }
+	ErlNifBinary binary;
+    	if (!enif_inspect_binary(env, argv[1], &binary)) {
+        	throw errors::invalid_type("invalid_binary");
+    	}
+
+	ErlNifPid pid;
+    	if (!enif_get_local_pid(env, argv[2], &pid)) {
+    	    throw errors::invalid_type("invalid_pid");
+    	}	
+
+	struct my_proto req;
+	memset(&req, 0, sizeof(req));
+	
+	req.nodeerl_req = 1;
+
+	memcpy(req.message, binary.data, binary.size);
+	req.len = binary.size;
+	req.pid = (int64_t)pid.pid;
+
+	//printf("pid %ld\n", req.pid);
+
+	qb_ipcc_send(vm->conn, &req, sizeof(req));	
+
+        return atoms.ok;
+    }
+    catch( std::exception & ex )
+    {
+        return enif_make_tuple2(env, atoms.error, enif_make_atom(env, ex.what()));
+    }
+}
 /////////////////////////////////////////////////////////////////////////////
 
 static ErlNifFunc nif_funcs[] = {
     {"start", 1, start},
-    {"request", 3, request}
+    {"request", 3, request},
+    {"callback", 3, callback}
 };
 
 ERL_NIF_INIT(erlnode_nif, nif_funcs, &init, NULL, NULL, NULL)

@@ -17,6 +17,8 @@ extern "C" {
 
 #include "ipcconn.h" 
 
+#include <sstream>
+
 using namespace v8;
 
 struct my_async_data {
@@ -145,17 +147,14 @@ void process_message(uv_async_t *handle, int status) {
 	void* data = async_data->data;
 	qb_ipcs_connection_t * c = async_data->c;
 
-	struct qb_ipc_request_header *hdr;
-	struct my_req *req_pt;	
+	struct my_proto *proto;	
 
-	hdr = (struct qb_ipc_request_header *)data;
+	proto = (struct my_proto *)data;
 
-	req_pt = (struct my_req *)data;
+	//printf("%d\n", proto->len);
+	//printf("%s\n", proto->message);
 
-	//printf("%d\n", req_pt->len);
-	//printf("%s\n", req_pt->message);
-
-	node::Buffer *buffer = node::Buffer::New(req_pt->message, req_pt->len);
+	node::Buffer *buffer = node::Buffer::New(proto->message, proto->len);
 
 	//memcpy(node::Buffer::Data(buffer), req_pt->message, req_pt->len);
 	
@@ -164,17 +163,37 @@ void process_message(uv_async_t *handle, int status) {
 
 	Handle<Object> client = IpcConn::NewInstance();
 	client->SetInternalField(0, External::New(c));
-	client->SetInternalField(1, External::New(&(req_pt->pid)));
+	client->SetInternalField(1, External::New(&(proto->pid)));
 	
-	const unsigned argc = 3;	
-	
-	Local<Value> argv[argc]	= {Local<Value>::New(client),
-				   Local<Value>::New(String::New("data")),
-				   //Local<Value>::New(String::New(req_pt->message, req_pt->len))};
-				   Local<Value>::New(buffer->handle_)};
+	const unsigned argc = 4;	
 
-	//printf("call\n");
-	cb_->Call(Context::GetCurrent()->Global(), argc, argv);
+	std::stringstream pidstr;
+	pidstr<<(proto->pid);
+	
+	if (proto->nodeerl_req) {
+		Local<Value> argv[argc]	= {Local<Value>::New(client),
+					   Local<Value>::New(String::New("callback")),
+					   //Local<Value>::New(String::New(req_pt->message, req_pt->len))};
+					   Local<Value>::New(buffer->handle_), 
+					   Local<Value>::New(Number::New(proto->pid))
+					   //Local<Value>::New(String::New(pidstr.str().c_str()))
+				           };
+
+		//printf("call\n");
+		cb_->Call(Context::GetCurrent()->Global(), argc, argv);
+
+	} else {		
+		Local<Value> argv[argc]	= {Local<Value>::New(client),
+					   Local<Value>::New(String::New("data")),
+					   //Local<Value>::New(String::New(req_pt->message, req_pt->len))};
+					   Local<Value>::New(buffer->handle_),
+					   Local<Value>::New(Number::New(proto->pid))
+					   //Local<Value>::New(String::New(pidstr.str().c_str()))
+					};
+
+		//printf("call\n");
+		cb_->Call(Context::GetCurrent()->Global(), argc, argv);
+	}
 
 }
 

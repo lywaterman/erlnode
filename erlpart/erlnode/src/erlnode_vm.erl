@@ -22,8 +22,8 @@ load(Pid, M, Timeout) ->
 	request(Pid, bert:encode({<<"load">>, to_binary(M)}), Timeout).
 
 request(Pid, Bin, Timeout) ->
-	gen_server:call(Pid, {request, Bin, self()}, Timeout),
-	receive_response_self().
+	{ok, VM} = gen_server:call(Pid, {request, Bin, self()}, Timeout),
+	receive_response_self(VM).
 
 response(Pid, Bin) ->
 	gen_server:cast(Pid, {request, Bin, self()}).
@@ -41,7 +41,7 @@ init(Options) ->
 
 handle_call({request, Bin, Caller}, _, State=#state{vm=VM}) ->
     ok = erlnode_nif:request(VM, Bin, Caller),
-    {reply, ok, State}.
+    {reply, {ok, VM}, State}.
 
 handle_cast(_, State) ->
     {noreply, State}.
@@ -57,11 +57,18 @@ code_change(_, State, _) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-receive_response_self() ->
+receive_response_self(VM) ->
     receive
         {nodeerl_response, Response, Caller} ->
-            Response
-	end.
+            Response;
+	{nodeerl_request,  Request, Caller} ->
+	    {ok, Return} = Request,
+	    %%如果在收到response之前，收到了Request先处理Request 
+	    {callback, CallbackUUID, M, F, A} = bert:decode(Return),
+	    Result = M:F(A),
+	    erlnode_nif:callback(VM, bert:encode({<<"callback">>, CallbackUUID, Result}), Caller),
+	    receive_response_self(VM)
+    end.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

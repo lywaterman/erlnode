@@ -10,19 +10,10 @@ extern "C" {
 
 #include "erl_nif.h"
 
-struct my_req {
-	struct qb_ipc_request_header hdr;
+struct my_proto {
 	int64_t pid;
+	int nodeerl_req;
 	int len;
-	char message[256];
-};
-
-struct my_res {
-	struct qb_ipc_response_header hdr;
-	int64_t pid;
-	int len;
-    int is_req;
-	int req_pid;
 	char message[256];
 };
 

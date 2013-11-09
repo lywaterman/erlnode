@@ -7,7 +7,7 @@
 
 namespace erlnode {
 
-ERL_NIF_TERM response_to_erlbinary(ErlNifEnv* env, my_res & response) {
+ERL_NIF_TERM response_to_erlbinary(ErlNifEnv* env, my_proto & response) {
 	ErlNifBinary binary;
     if (!enif_alloc_binary(response.len, &binary)) {
         throw errors::enomem();
@@ -16,35 +16,7 @@ ERL_NIF_TERM response_to_erlbinary(ErlNifEnv* env, my_res & response) {
     return enif_make_binary(env, &binary);
 }
 
-void send_result_req(vm_t & vm, std::string const& type, my_res & response)
-{
-	ErlNifEnv* env = enif_alloc_env();
-	
-	ERL_NIF_TERM result_array[2];
-
-    result_array[0] = enif_make_atom(env, "ok");
-    result_array[1] = response_to_erlbinary(env, response);
-
-	ERL_NIF_TERM result = enif_make_tuple_from_array(env, result_array, 2);
-
-	ErlNifPid caller;
-	caller.pid = response.req_pid;
-
-	//printf("pid %ld\n", response.pid);
-
-	ERL_NIF_TERM packet[3];
-    packet[0] = enif_make_atom(env, type.c_str());
-    packet[1] = result;
-	packet[2] = enif_make_pid(env, &caller);
-
-	ERL_NIF_TERM tuple = enif_make_tuple_from_array(env, packet, 3);
-
-    enif_send(NULL, &caller, env, tuple);
-
-	enif_free_env(env);
-}
-
-void send_result_res(vm_t & vm, std::string const& type, my_res & response)
+void send_node_to_erl(vm_t & vm, std::string const& type, my_proto & response)
 {
 	ErlNifEnv* env = enif_alloc_env();
 	
@@ -114,24 +86,18 @@ void vm_t::run()
     {
         for(;;)
         {
-			//struct my_res res;
-			//memset(&res, 0, sizeof(res));
-			//int rc = qb_ipcc_recv(this->conn, &res, sizeof(res), -1);
-			//printf("%s\n", res.message);
-
-			//sleep(0);
 			if (this->conn != NULL) {
-				struct my_res res;
-				memset(&res, 0, sizeof(res));
+				struct my_proto proto;
+				memset(&proto, 0, sizeof(proto));
 
-				qb_ipcc_event_recv(this->conn, &res, sizeof(res), 0);
+				qb_ipcc_event_recv(this->conn, &proto, sizeof(proto), 0);
 				
-				if (res.pid > 0) {
+				if (proto.pid > 0) {
 					//printf("%s\n", res.message);
-					if (res.is_req) {
-						send_result_req(*this, "nodeerl_request", res);
+					if (proto.nodeerl_req) {
+						send_node_to_erl(*this, "nodeerl_request", proto);
 					} else {	
-						send_result_res(*this, "nodeerl_response", res);
+						send_node_to_erl(*this, "nodeerl_response", proto);
 					}
 				}
 			}

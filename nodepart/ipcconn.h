@@ -11,19 +11,10 @@ extern "C" {
 	#include <qb/qbipcs.h> 
 }
 
-struct my_req {
-	struct qb_ipc_request_header hdr;
+struct my_proto {
 	int64_t pid;
+	int nodeerl_req;
 	int len;
-	char message[256];
-};
-
-struct my_res {
-	struct qb_ipc_response_header hdr;
-	int64_t pid;
-	int len;
-	int is_req;
-	int req_pid;
 	char message[256];
 };
 
@@ -39,7 +30,8 @@ class IpcConn: public node::ObjectWrap {
 		~IpcConn();
 
 		static v8::Handle<v8::Value> New(const Arguments& args);
-		static v8::Handle<v8::Value> Send(const v8::Arguments& args); 			
+		static v8::Handle<v8::Value> Resp(const v8::Arguments& args); 			
+		static v8::Handle<v8::Value> Call(const v8::Arguments& args); 			
 
 		static v8::Persistent<v8::Function> constructor;	
 	

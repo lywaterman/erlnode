@@ -1,6 +1,6 @@
 -module(erlnode_nif).
 
--export([start/1, request/3]).
+-export([start/1, request/3, callback/3]).
 -on_load(init/0).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -9,6 +9,9 @@ start(_) ->
     exit(nif_library_not_loaded).
 
 request(_, _, _) ->
+    exit(nif_library_not_loaded).
+
+callback(_, _, _) ->
     exit(nif_library_not_loaded).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
