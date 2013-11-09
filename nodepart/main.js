@@ -20,6 +20,12 @@ console.log('Server running at http://127.0.0.1:1337/');
 
 console.log(xx.send)
 
+for(var key in require.cache){
+	console.log("cache keys")
+	console.log(key)
+}   
+//delete require.cache['./test']
+
 //pid callback
 //from erl to node
 nodeerl_callbacks = {

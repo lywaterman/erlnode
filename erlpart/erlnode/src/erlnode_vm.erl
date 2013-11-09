@@ -8,7 +8,7 @@
 
 %% api:
 -export([start_link/1]).
--export([request/3, call/5, load/3]).
+-export([request/3, call/5, load/3, eval/3]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public api:
@@ -20,6 +20,8 @@ call(Pid, M, F, A, Timeout) ->
 	request(Pid, bert:encode({<<"call">>, to_binary(M), to_binary(F), A}), Timeout).
 load(Pid, M, Timeout) ->
 	request(Pid, bert:encode({<<"load">>, to_binary(M)}), Timeout).
+eval(Pid, M, Timeout) ->
+	request(Pid, bert:encode({<<"eval">>, to_binary(M)}), Timeout).
 
 request(Pid, Bin, Timeout) ->
 	{ok, VM} = gen_server:call(Pid, {request, Bin, self()}, Timeout),
