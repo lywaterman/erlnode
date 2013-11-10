@@ -14,11 +14,10 @@ It use bert proto
 I will build like call, load, eval on top on bert, and make erlang call node, or node call erlang
 like a embed call
 
+           call eval etc
+           bert proto
+erlang<-------ipc_shm------->node
 
-|||||||||         call eval etc
-|||||||||         bert proto     ||||||||||  
-erlang||| <-------ipc_shm------->|||node|||
-|||||||||                        ||||||||||
 
 progress:
 complete nodejs call erl, and when erlang call node, 
