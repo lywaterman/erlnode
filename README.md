@@ -19,3 +19,7 @@ like a embed call
 |||||||||         bert proto     ||||||||||  
 erlang||| <-------ipc_shm------->|||node|||
 |||||||||                        ||||||||||
+
+progress:
+complete nodejs call erl, and when erlang call node, 
+in the call stack, you can call erlang and register a continuation callback
